@@ -1,0 +1,37 @@
+version: '3.2'
+
+services:
+
+### OMS SERVICE REGISTRY        #######################################
+    oms-central-frontend:
+        build:
+            context: ./$PATH_OMS_CENTRAL_FRONTEND/oms-central-frontend/
+            dockerfile: ./Dockerfile.dev
+        volumes:
+            - "./$PATH_OMS_CENTRAL_FRONTEND/../:/usr/app/src"
+            - "centralfrontend:/usr/app/dist"
+
+    oms-central-frontend-nginx:
+        build:
+            context: ./$PATH_OMS_CENTRAL_FRONTEND/oms-central-frontend-nginx/
+            dockerfile: ./Dockerfile.dev
+        volumes:
+            - "centralfrontend:/usr/app/dist:ro"
+        ports:
+            - "8088:80"
+        labels:
+            - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/"
+            - "traefik.frontend.priority=1"
+            - "traefik.port=80"
+            - "traefik.backend=oms-central-frontend"
+            - "traefik.enable=true"
+            - "registry.status=/status.json"
+
+volumes:
+    centralfrontend:
+        driver: "local"
+
+networks:
+  default:
+    external:
+      name: OMS

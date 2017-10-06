@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en" ng-app="omsApp">
+<!--<![endif]-->
+<head>
+  <base href="/">
+  <meta charset="utf-8" />
+  <title data-ng-bind="'{{appName}} | ' + $state.current.data.pageTitle">{{appName}}</title>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+  {{#each metaTags}}
+  <meta content="{{this.content}}" name="{{this.name}}" />
+  {{/each}}
+  
+  <!-- ================== BEGIN BASE CSS STYLE ================== -->
+  {{#each externalCSS}}
+  <link href="{{this}}" rel="stylesheet" />
+  {{/each}}
+  <link href="vendor/vendor.css" rel="stylesheet" />
+  <link href="main.css" rel="stylesheet" />
+  {{#each internalCSS}}
+  <link href="{{this}}" rel="stylesheet" />
+  {{/each}}
+
+  <!-- ================== END BASE CSS STYLE ================== -->
+  {{#if debugBuild}}
+  <style type="text/css">
+    #devMode {
+      display: block;
+      /*position: absolute;*/
+      height: 60px;
+      /*width: 400px;*/
+      background-color: #E91E63;
+      z-index: 99998;
+      box-shadow: 0 1px 5px 0 rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.12);
+      color: #fff;
+      top: 90%;
+      right: 0.5%;
+    }
+
+    #devMessage {
+      padding: 8px;
+      font-size: 16px;
+    }
+  </style>
+  {{/if}}
+</head>
+<body ng-controller="appController" ng-class="{'pace-top': setting.layout.paceTop, 'boxed-layout': setting.layout.pageBoxedLayout, 'bg-white': setting.layout.pageBgWhite }">
+  <!-- begin #page-loader -->
+  <!--<div id="page-loader" ng-controller="pageLoaderController" class="fade in"><span class="spinner"></span></div>-->
+  <!-- end #page-loader -->
+  
+  <!-- begin #page-container -->
+  <div id="page-container" class="page-container page-sidebar-fixed page-header-fixed fade"
+  ng-class="{
+    'page-sidebar-minified': setting.layout.pageSidebarMinified,
+    'page-content-full-height': setting.layout.pageContentFullHeight,
+    'page-footer-fixed': setting.layout.pageFixedFooter,
+    'page-with-right-sidebar': setting.layout.pageRightSidebar,
+    'page-sidebar-minified': setting.layout.pageSidebarMinified,
+    'page-with-two-sidebar': setting.layout.pageTwoSidebar,
+    'page-right-sidebar-toggled': setting.layout.pageTwoSidebar,
+    'page-with-top-menu': setting.layout.pageTopMenu,
+    'page-without-sidebar': setting.layout.pageWithoutSidebar,
+    'page-with-wide-sidebar': setting.layout.pageWideSidebar,
+    'page-with-light-sidebar': setting.layout.pageLightSidebar,
+    'p-t-0': setting.layout.pageWithoutHeader
+  }">
+    <div id="loadingOverlay" class="hiddenItem">
+      <div class="loadingText">
+        <img src="assets/img/loading.gif" /> Loading, please wait!
+      </div>
+    </div>
+    <div id="main" ui-view="main"></div>
+  </div>
+  <!-- end page container -->
+  {{#if debugBuild}}
+  <div id="devMode">
+    <div id="devMessage" class="text-center">
+      <b>** DEBUG BUILD **</b> <br />All data is volatile and can be reverted at any time!
+    </div>
+  </div>
+  {{/if}}
+
+  <!-- ================== Vendor js ================== -->
+
+  {{#each externalJS}}
+  <script type="text/javascript" src="{{this}}"></script>
+  {{/each}}
+  <script src="vendor/vendor.js"></script>
+  <!--[if lt IE 9]>
+    <script src="vendor/crossbrowser.js"></script>
+  <![endif]-->
+
+  <!-- ================== Base js ================== -->
+  <script type="text/javascript">
+    /**
+     * Main module
+     */
+
+    var omsApp = angular
+    .module('omsApp', [
+      {{#each angularModules}}
+      '{{this}}',
+      {{/each}}
+    ])
+    .config(appConfig)
+    .factory(responseObserver)
+    .run(appRun);
+
+
+    var baseUrlRepository = {
+      {{#each baseUrlRepo}}
+        "{{this.service}}": "{{this.url}}",
+      {{/each}}
+    };
+   
+  </script>
+
+  <script src="main.js"></script>
+
+  <!-- ================== Microservice includes ================== -->
+
+  {{#each internalJS}}
+  <script type="text/javascript" src="{{this}}"></script>
+  {{/each}}
+</body>
+</html>

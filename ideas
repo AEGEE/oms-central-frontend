@@ -1,0 +1,2 @@
+The idea is to support two operating modes: direct includes and compile
+In case of direct includes all the files of the microservices are included directly in the template and the browser will fetch them one by one. This is nice for development purposes. For production they will all be concatenated into one.

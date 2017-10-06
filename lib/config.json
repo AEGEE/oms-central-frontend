@@ -1,0 +1,5 @@
+{
+  "gulp_interval": 10000,
+  "registry_url": "http://omsserviceregistry",
+  "dist_folder": "dist"
+}

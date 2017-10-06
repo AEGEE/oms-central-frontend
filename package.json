@@ -1,0 +1,27 @@
+{
+  "name": "oms-central-frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-clean": "^0.3.2",
+    "gulp-clean-css": "^3.9.0",
+    "gulp-compile-handlebars": "^0.6.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-concat-css": "^2.3.0",
+    "gulp-concat-js": "^0.1.0",
+    "gulp-debug": "^3.1.0",
+    "gulp-download": "0.0.1",
+    "gulp-empty": "^0.1.2",
+    "gulp-merge": "^0.1.1",
+    "gulp-minify": "^1.0.0",
+    "gulp-sourcemaps": "^2.6.1",
+    "request": "^2.83.0"
+  }
+}
