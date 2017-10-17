@@ -1,5 +1,7 @@
 {
   "gulp_interval": 10000,
-  "registry_url": "http://omsserviceregistry",
-  "dist_folder": "dist"
+  "registry_url": "http://omsserviceregistry:7000/",
+  "dist_folder": "/usr/app/dist",
+  "build_folder": "/usr/app/src/build",
+  "devMode": true
 }

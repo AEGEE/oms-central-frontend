@@ -2,7 +2,7 @@ version: '3.2'
 
 services:
 
-### OMS SERVICE REGISTRY        #######################################
+### OMS SERVICE REGISTRY #######################################
     oms-central-frontend:
         build:
             context: ./$PATH_OMS_CENTRAL_FRONTEND/oms-central-frontend/
@@ -21,11 +21,12 @@ services:
             - "8088:80"
         labels:
             - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/"
-            - "traefik.frontend.priority=1"
+            - "traefik.frontend.priority=-1"
             - "traefik.port=80"
             - "traefik.backend=oms-central-frontend"
             - "traefik.enable=true"
             - "registry.status=/status.json"
+            - "registry.modules=/getModules.json"
 
 volumes:
     centralfrontend:

@@ -1,0 +1,23 @@
+{
+  "name": "OMS Central Frontend",
+  "code": "oms-central-frontend",
+  "pages": [{
+    "name": "All events",
+    "code": "events",
+    "module_link": "frontend/all/eventsController.js",
+    "icon": "fa fa-ticket"
+  }, {
+    "name": "Event admin",
+    "code": "eventadmin",
+    "module_link": "frontend/admin/adminController.js",
+    "icon": "fa fa-wrench"
+  }],
+  "css": ["frontend/style.css"],
+  "js": ["frontend/some_more_js.css"],
+  "deps": [{
+    "npm": "angular-something",
+    "css": ["node-modules/angular-something/dist/main.css"],
+    "js": ["node-modules/angular-something/dist/main.js"],
+    "module": "rzModulename"
+  }]
+}

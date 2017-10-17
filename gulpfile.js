@@ -11,11 +11,14 @@ const gulpCleanJS = require('gulp-minify');
 const gulpEmpty = require('gulp-empty');
 const gulpDebug = require('gulp-debug');
 const gulpClean = require('gulp-clean');
+const cmd = require('node-cmd');
 
-const fetchTemplate = require('./lib/fetchTemplateData.js');
-const fetchCSS = require('./lib/fetchCSS.js');
-const fetchJS = require('./lib/fetchJS.js');
+const parse = require('./lib/parse.js');
 const config = require('./lib/config.json');
+const queryServices = require('./lib/queryServices.js');
+
+// Save services in RAM
+var services = [];
 
 function merge(local, remote) {
   if(local.length && !remote.length)
@@ -25,50 +28,48 @@ function merge(local, remote) {
   else if(local.length && remote.length)
     return gulpMerge(gulp.src(local), gulpDownload(remote));
   else
-    throw "No files that can be build"
+    return gulpEmpty()
 }
 
-gulp.task('html', function(done){
-  fetchTemplate((templateData) => {
-    gulp.src('templates/**/*')
-      .pipe(gulpDebug({title: 'HTML'}))
-      .pipe(gulpHandlebars(templateData))
-      .pipe(gulp.dest(config.dist_folder));
+gulp.task('fetch', function(done) {
+  queryServices((res) => {
+    services = res;
     done();
   });
 });
 
-gulp.task('css', function(done){
-  fetchCSS((cssData) => {
-    merge('assets/css/**/*.css', cssData.remote)
-      .pipe(gulpDebug({title: 'CSS'}))
-      .pipe(gulpSourcemaps.init())
-      .pipe(gulpCleanCSS())
-      .pipe(gulpConcat('assets/main.css'))
-      .pipe(gulpSourcemaps.write())
-      .pipe(gulp.dest(config.dist_folder));
-    done();
-  })
+gulp.task('html', function(){
+  const templateData = parse.template(services);
+  return gulp.src('templates/**/*')
+    .pipe(gulpDebug({title: 'HTML'}))
+    .pipe(gulpHandlebars(templateData))
+    .pipe(gulp.dest(config.dist_folder));
 });
 
-gulp.task('js', function(done){
-  fetchJS((jsData) => {
-    download = () => {
-      if(jsData.remote)
-        return gulpDownload(jsData.remote);
-      else
-        return gulpEmpty();
-    }
+gulp.task('css', function(){
+  const cssData = parse.css(services);
+  // Merge whatever is in the css folder and what services want to include
+  // Do not add the service includes in dev mode as then it will be included directly by url
+  return merge('assets/css/**/*.css', config.devMode ? [] : cssData.local)
+    .pipe(gulpDebug({title: 'CSS'}))
+    .pipe(gulpSourcemaps.init())
+    .pipe(gulpCleanCSS())
+    .pipe(gulpConcat('assets/main.css'))
+    .pipe(gulpSourcemaps.write())
+    .pipe(gulp.dest(config.dist_folder));
+});
 
-    merge('assets/js/**/*.js', jsData.remote)
-      .pipe(gulpDebug({title: 'JS'}))
-      .pipe(gulpSourcemaps.init())
-      //.pipe(gulpCleanJS())
-      .pipe(gulpConcat('main.js'))
-      .pipe(gulpSourcemaps.write())
-      .pipe(gulp.dest(config.dist_folder));
-    done();
-  });
+gulp.task('js', function(){
+  const jsData = parse.js(services);
+  // Merge whatever is in the css folder and what services want to include
+  // Do not add the service includes in dev mode as then it will be included directly by url
+  return merge('assets/js/**/*.js', config.devMode ? [] : jsData.local)
+    .pipe(gulpDebug({title: 'JS'}))
+    .pipe(gulpSourcemaps.init())
+    //.pipe(gulpCleanJS())
+    .pipe(gulpConcat('assets/main.js'))
+    .pipe(gulpSourcemaps.write())
+    .pipe(gulp.dest(config.dist_folder));
 });
 
 gulp.task('static', function() {
@@ -76,13 +77,73 @@ gulp.task('static', function() {
     .pipe(gulp.dest(config.dist_folder));
 })
 
+// Execute npm install to fetch frontend dependencies
+gulp.task('vendor-install', (callback) => {
+  const deps = parse.deps(services);
+  const modules = deps.npm.join(' ');
+  var command = `
+    mkdir -p ${config.build_folder}
+    cd ${config.build_folder}
+    npm init --yes > /dev/null
+    npm install --save ${modules}
+  `;
+  console.log("Executing: ", command);
+  const processRef = cmd.get(command, (err, stdout, stderr) => {
+    if(err) {
+      console.log("The npm command failed", err);
+      return callback(err);
+    }
+    else {
+      return callback();
+    }
+  });
 
-gulp.task('clean', function () {
-  return gulp.src(config.dist_folder + '/*', {read: false})
-    .pipe(gulpClean());
+  let data_line = '';
+   
+  //listen to the terminal output 
+  processRef.stdout.on('data', function(data) {
+    data_line += data;
+    if (data_line[data_line.length-1] == '\n') {
+      console.log(data_line);
+    }
+  });
 });
 
-gulp.task('default', gulp.parallel('html', 'css', 'js', 'static'));
+gulp.task('vendor-css', function(done) {
+  const deps = parse.deps(services);
+  deps.css.unshift('assets/vendor-css/**/*.css');
+
+  return merge(deps.css, [])
+    .pipe(gulpDebug({title: 'Vendor CSS'}))
+    .pipe(gulpCleanCSS())
+    .pipe(gulpConcat('assets/vendor.css'))
+    .pipe(gulp.dest(config.dist_folder));
+});
+
+gulp.task('vendor-js', function(done) {
+  const deps = parse.deps(services);
+  deps.js.unshift('assets/vendor-js/**/*.js');
+
+  return merge(deps.js, [])
+    .pipe(gulpDebug({title: 'Vendor JS'}))
+    //.pipe(gulpCleanJS())
+    .pipe(gulpConcat('assets/vendor.js'))
+    .pipe(gulp.dest(config.dist_folder));
+});
+
+
+gulp.task('vendor', gulp.series('vendor-install', 'vendor-css', 'vendor-js'))
+
+gulp.task('clean', function (done) {
+  cmd.get(`
+    cd ${config.dist_folder} && rm -rf *
+    cd ${config.build_folder} && rm -rf *
+    `, (err, stdout, stderr) => {
+      done()
+    });
+});
+
+gulp.task('default', gulp.series('fetch', 'vendor', 'css', 'js', 'static', 'html'));
 
 gulp.task('every', () => {
   setInterval(gulp.parallel('default'), config.gulp_interval);

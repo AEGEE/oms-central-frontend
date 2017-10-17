@@ -12,18 +12,22 @@
   <meta content="{{this.content}}" name="{{this.name}}" />
   {{/each}}
   
-  <!-- ================== BEGIN BASE CSS STYLE ================== -->
+  <!-- ================== Vendor CSS ================== -->
   {{#each externalCSS}}
   <link href="{{this}}" rel="stylesheet" />
   {{/each}}
-  <link href="vendor/vendor.css" rel="stylesheet" />
-  <link href="main.css" rel="stylesheet" />
+  <link href="assets/vendor.css" rel="stylesheet" />
+
+  <!-- ================== Main app style ================== --> 
+  <link href="assets/main.css" rel="stylesheet" />
+
+  <!-- ================== Microservice includes ================== -->
   {{#each internalCSS}}
   <link href="{{this}}" rel="stylesheet" />
   {{/each}}
 
-  <!-- ================== END BASE CSS STYLE ================== -->
   {{#if debugBuild}}
+  <!-- ================== Debug build warning sign ================== -->
   <style type="text/css">
     #devMode {
       display: block;
@@ -87,7 +91,7 @@
   {{#each externalJS}}
   <script type="text/javascript" src="{{this}}"></script>
   {{/each}}
-  <script src="vendor/vendor.js"></script>
+  <script src="assets/vendor.js"></script>
   <!--[if lt IE 9]>
     <script src="vendor/crossbrowser.js"></script>
   <![endif]-->
@@ -111,16 +115,15 @@
 
     var baseUrlRepository = {
       {{#each baseUrlRepo}}
-        "{{this.service}}": "{{this.url}}",
+        "{{this.code}}": "{{this.url}}",
       {{/each}}
     };
    
   </script>
 
-  <script src="main.js"></script>
+  <script src="assets/main.js"></script>
 
-  <!-- ================== Microservice includes ================== -->
-
+  <!-- ================== Microservice includes  ================== -->
   {{#each internalJS}}
   <script type="text/javascript" src="{{this}}"></script>
   {{/each}}

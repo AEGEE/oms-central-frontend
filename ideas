@@ -1,2 +1,3 @@
 The idea is to support two operating modes: direct includes and compile
 In case of direct includes all the files of the microservices are included directly in the template and the browser will fetch them one by one. This is nice for development purposes. For production they will all be concatenated into one.
+Also it would be great to auto-generate karma/jasmine test-cases checking for the existence of the declared controllers in getModules.json to make it impossible to break the frontend through adding a microservice
