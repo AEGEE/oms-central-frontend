@@ -1,7 +1,4 @@
-<?php
-require_once('../../scripts/template_scripts.php');
-$omsObj = new omsHelperScript();
-?>
+
 <!-- begin #sidebar -->
 <div id="sidebar" class="sidebar" ng-controller="sidebarController as vm" ng-class="{ 'sidebar-transparent': setting.layout.pageSidebarTransparent }">
     <!-- begin sidebar scrollbar -->
@@ -21,12 +18,15 @@ $omsObj = new omsHelperScript();
         <!-- end sidebar user -->
         <!-- begin sidebar nav -->
         <ul class="nav">
-            <li class="nav-header">Navigation</li>
-            <li ui-sref-active="active"><a ui-sref="app.dashboard"><i class="fa fa-laptop"></i> <span>Dashboard</span></a></li>
-            <?=$omsObj->menuMarkUp?>
-            <!-- begin sidebar minify button -->
+            <!-- Module navigation -->
+            {{#each modules}}
+            <li class="nav-header">{{this.name}}</li>
+            {{#each this.pages}}
+            <li ui-sref-active="active"><a ui-sref="app.{{this.code}}"><i class="{{this.icon}}"></i><span>{{this.name}}</span></a></li>
+            {{/each}}
+            {{/each}}
+            <!-- sidebar minify button -->
             <li><a href="javascript:;" class="sidebar-minify-btn" data-click="sidebar-minify"><i class="fa fa-angle-double-left"></i></a></li>
-            <!-- end sidebar minify button -->
         </ul>
         <!-- end sidebar nav -->
     </div>

@@ -30,6 +30,7 @@ gulp.task('fetch', function(done) {
 
 gulp.task('html', function(){
   const templateData = parse.template(services);
+  console.log(templateData);
   return gulp.src('templates/**/*')
     .pipe(gulpDebug({title: 'HTML'}))
     .pipe(gulpHandlebars(templateData))
@@ -156,6 +157,8 @@ gulp.task('clean', function (done) {
       done()
     });
 });
+
+gulp.task('offline', gulp.series('fetch', 'download', 'css', 'js', 'static', 'html'));
 
 gulp.task('default', gulp.series(
   'fetch',

@@ -1,6 +1,7 @@
 {
   "name": "OMS Central Frontend",
   "code": "oms-central-frontend",
+  "menu_position": 200,
   "pages": [{
     "name": "All events",
     "code": "events",

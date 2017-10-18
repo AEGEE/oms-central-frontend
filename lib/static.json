@@ -9,6 +9,16 @@
     "ui.bootstrap",
     "public.welcome"],
   "appName": "OMS",
+  "defaultModules": [{
+    "name": "Navigation",
+    "menu_position": 1,
+    "pages": [{
+      "code": "dashboard",
+      "name": "Navigation",
+      "icon": "fa fa-laptop"
+    }]
+  }],
+  "blacklistedModules": ["oms-blacklisted-microservice"],
   "dependencies": [{
     "npm": "angular",
     "js": ["node_modules/angular/angular.js"]
