@@ -3,5 +3,6 @@
   "registry_url": "http://omsserviceregistry:7000/",
   "dist_folder": "/usr/app/dist",
   "build_folder": "/usr/app/src/build",
-  "devMode": true
+  "download_folder": "/usr/app/downloads",
+  "devMode": false
 }

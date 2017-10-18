@@ -1,13 +1,14 @@
 const gulp = require('gulp');
 const gulpHandlebars = require('gulp-compile-handlebars');
 const gulpMerge = require('gulp-merge');
-const gulpDownload = require('gulp-download');
+const gulpDownload = require('gulp-download-stream');
 const gulpConcatCSS = require('gulp-concat-css');
 const gulpConcatJS = require('gulp-concat-js');
 const gulpSourcemaps = require('gulp-sourcemaps');
 const gulpConcat = require('gulp-concat');
 const gulpCleanCSS = require('gulp-clean-css');
 const gulpCleanJS = require('gulp-minify');
+const gulpUglify = require('gulp-uglify');
 const gulpEmpty = require('gulp-empty');
 const gulpDebug = require('gulp-debug');
 const gulpClean = require('gulp-clean');
@@ -19,17 +20,6 @@ const queryServices = require('./lib/queryServices.js');
 
 // Save services in RAM
 var services = [];
-
-function merge(local, remote) {
-  if(local.length && !remote.length)
-    return gulp.src(local);
-  else if(!local.length && remote.length)
-    return gulpDownload(remote);
-  else if(local.length && remote.length)
-    return gulpMerge(gulp.src(local), gulpDownload(remote));
-  else
-    return gulpEmpty()
-}
 
 gulp.task('fetch', function(done) {
   queryServices((res) => {
@@ -46,30 +36,53 @@ gulp.task('html', function(){
     .pipe(gulp.dest(config.dist_folder));
 });
 
+gulp.task('download', function() {
+  const cssData = parse.css(services);
+  const jsData = parse.js(services);
+  return gulpDownload(cssData.local.concat(jsData.local))
+    .pipe(gulp.dest(config.download_folder));
+})
+
 gulp.task('css', function(){
   const cssData = parse.css(services);
   // Merge whatever is in the css folder and what services want to include
   // Do not add the service includes in dev mode as then it will be included directly by url
-  return merge('assets/css/**/*.css', config.devMode ? [] : cssData.local)
-    .pipe(gulpDebug({title: 'CSS'}))
-    .pipe(gulpSourcemaps.init())
-    .pipe(gulpCleanCSS())
-    .pipe(gulpConcat('assets/main.css'))
-    .pipe(gulpSourcemaps.write())
-    .pipe(gulp.dest(config.dist_folder));
+  if(!config.devMode) {
+    return gulp.src(['assets/css/**/*.css', config.download_folder + '/**/*.css'])
+      .pipe(gulpDebug({title: 'CSS'}))
+      .pipe(gulpCleanCSS())
+      .pipe(gulpConcat('assets/main.css'))
+      .pipe(gulp.dest(config.dist_folder));
+  }
+  else {
+    return gulp.src('assets/css/**/*.css')
+      .pipe(gulpDebug({title: 'CSS'}))
+      .pipe(gulpSourcemaps.init())
+      .pipe(gulpConcat('assets/main.css'))
+      .pipe(gulpSourcemaps.write())
+      .pipe(gulp.dest(config.dist_folder));
+  }
 });
 
 gulp.task('js', function(){
   const jsData = parse.js(services);
   // Merge whatever is in the css folder and what services want to include
   // Do not add the service includes in dev mode as then it will be included directly by url
-  return merge('assets/js/**/*.js', config.devMode ? [] : jsData.local)
-    .pipe(gulpDebug({title: 'JS'}))
-    .pipe(gulpSourcemaps.init())
-    //.pipe(gulpCleanJS())
-    .pipe(gulpConcat('assets/main.js'))
-    .pipe(gulpSourcemaps.write())
-    .pipe(gulp.dest(config.dist_folder));
+  if(!config.devMode) {
+    return gulp.src(['assets/js/**/*.js', config.download_folder + '/**/*.js'])
+      .pipe(gulpDebug({title: 'JS'}))
+      .pipe(gulpCleanJS())
+      .pipe(gulpConcat('assets/main.js'))
+      .pipe(gulp.dest(config.dist_folder));  
+  }
+  else {
+    return gulp.src('assets/js/**/*.js')
+      .pipe(gulpDebug({title: 'JS'}))
+      .pipe(gulpSourcemaps.init())
+      .pipe(gulpConcat('assets/main.js'))
+      .pipe(gulpSourcemaps.write())
+      .pipe(gulp.dest(config.dist_folder));
+  }
 });
 
 gulp.task('static', function() {
@@ -113,9 +126,9 @@ gulp.task('vendor-css', function(done) {
   const deps = parse.deps(services);
   deps.css.unshift('assets/vendor-css/**/*.css');
 
-  return merge(deps.css, [])
+  return gulp.src(deps.css)
     .pipe(gulpDebug({title: 'Vendor CSS'}))
-    .pipe(gulpCleanCSS())
+    .pipe(gulpCleanCSS({level: {1: {all:true}, 2: {all: true}}})) // maximum optimization level
     .pipe(gulpConcat('assets/vendor.css'))
     .pipe(gulp.dest(config.dist_folder));
 });
@@ -124,9 +137,9 @@ gulp.task('vendor-js', function(done) {
   const deps = parse.deps(services);
   deps.js.unshift('assets/vendor-js/**/*.js');
 
-  return merge(deps.js, [])
+  return gulp.src(deps.js)
     .pipe(gulpDebug({title: 'Vendor JS'}))
-    //.pipe(gulpCleanJS())
+    .pipe(gulpUglify()) // uglify turned out better than clean-js, though making the sourcecode unreadable
     .pipe(gulpConcat('assets/vendor.js'))
     .pipe(gulp.dest(config.dist_folder));
 });
@@ -138,13 +151,19 @@ gulp.task('clean', function (done) {
   cmd.get(`
     cd ${config.dist_folder} && rm -rf *
     cd ${config.build_folder} && rm -rf *
+    cd ${config.download_folder} && rm -rf *
     `, (err, stdout, stderr) => {
       done()
     });
 });
 
-gulp.task('default', gulp.series('fetch', 'vendor', 'css', 'js', 'static', 'html'));
+gulp.task('default', gulp.series(
+  'fetch',
+  'download',
+//  gulp.parallel('vendor', 'css', 'js', 'static'),
+  'vendor', 'css', 'js', 'static',
+  'html'));
 
 gulp.task('every', () => {
-  setInterval(gulp.parallel('default'), config.gulp_interval);
+  setInterval(gulp.series('default'), config.gulp_interval);
 })

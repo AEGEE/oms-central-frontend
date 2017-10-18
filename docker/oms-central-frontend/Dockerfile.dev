@@ -4,4 +4,4 @@ RUN npm install -g gulp-cli
 
 WORKDIR /usr/app/src
 
-CMD npm install && gulp every
+CMD npm install && gulp
