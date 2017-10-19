@@ -19,6 +19,7 @@
     "npm": "angular-something",
     "css": ["node-modules/angular-something/dist/main.css"],
     "js": ["node-modules/angular-something/dist/main.js"],
+    "assets": ["node-modules/angular-something/dist/font.ttf"],
     "module": "rzModulename"
   }]
 }

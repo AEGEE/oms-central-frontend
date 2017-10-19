@@ -5,9 +5,7 @@
   ],
   "externalCSS": ["//fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"],
   "externalJS": [],
-  "modules": ["ui.router",
-    "ui.bootstrap",
-    "public.welcome"],
+  "modules": ["public.welcome"],
   "appName": "OMS",
   "defaultModules": [{
     "name": "Navigation",
@@ -19,18 +17,71 @@
     }]
   }],
   "blacklistedModules": ["oms-blacklisted-microservice"],
-  "dependencies": [{
+  "dependencies": [
+  {
+    "npm": "jquery",
+    "js": "node_modules/jquery/dist/jquery.js"
+  }, {
+    "npm": "bootstrap@3",
+    "css": ["node_modules/bootstrap/dist/css/bootstrap.css"],
+    "js": ["node_modules/bootstrap/dist/js/bootstrap.js"],
+    "assets": ["node_modules/bootstrap/dist/fonts/glyphicons-halflings-regular.woff"]
+  }, {
+    "npm": "font-awesome",
+    "css": "node_modules/font-awesome/css/font-awesome.css",
+    "assets": "node_modules/font-awesome/fonts/fontawesome-webfont.woff"
+  }, {
     "npm": "angular",
     "js": ["node_modules/angular/angular.js"]
   }, {
     "npm": "angular-ui-router",
     "js": ["node_modules/angular-ui-router/release/angular-ui-router.js"],
-    "css": "",
-    "module": "ui-router"
+    "module": "ui.router"
   }, {
     "npm": "angular-ui-bootstrap",
     "js": ["node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js"],
     "css": ["node_modules/angular-ui-bootstrap/dist/ui-bootstrap-csp.css"],
-    "module": "ui-bootstrap"
+    "module": "ui.bootstrap"
+  }, {
+    "npm": "gritter",
+    "js": "node_modules/gritter/js/jquery.gritter.js",
+    "css": "node_modules/gritter/css/jquery.gritter.css"
+  }, {
+    "npm": "select2",
+    "js": "node_modules/select2/dist/js/select2.js",
+    "css": "node_modules/select2/dist/css/select2.css"
+  }, {
+    "npm": "ionicons",
+    "css": "node_modules/ionicons/dist/css/ionicons.css",
+    "assets": "node_modules/ionicons/dist/fonts/ionicons.woff"
+  }, {
+    "npm": "twitter-bootstrap-wizard",
+    "js": "node_modules/twitter-bootstrap-wizard/jquery.bootstrap.wizard.js"
+  }, {
+    "npm": "bootstrap-datepicker",
+    "css": "node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker3.css",
+    "js": "node_modules/bootstrap-datepicker/dist/js/bootstrap-datepicker.js"
+  }, {
+    "npm": "parsleyjs",
+    "js": "node_modules/parsleyjs/dist/parsley.js"
+  }, {
+    "npm": "angular-bootstrap-datetimepicker",
+    "css": "node_modules/angular-bootstrap-datetimepicker/src/css/datetimepicker.css",
+    "js": "node_modules/angular-bootstrap-datetimepicker/src/js/datetimepicker.js",
+    "module": "ui.bootstrap.datetimepicker"
+  }, {
+    "npm": "angularjs-slider",
+    "css": "node_modules/angularjs-slider/dist/rzslider.css",
+    "js": "node_modules/angularjs-slider/dist/rzslider.js",
+    "module": "rzModule"
+  }, {
+    "npm": "ng-switchery",
+    "css": "node_modules/ng-switchery/dist/switchery.min.css",
+    "js": "node_modules/ng-switchery/dist/ng-switchery.js",
+    "module": "NgSwitchery"
+  }, {
+    "npm": "angular-bootstrap3-typeahead",
+    "js": "node_modules/angular-bootstrap3-typeahead/angular-bootstrap3-typeahead.js",
+    "module": "bootstrap3-typeahead"
   }]
 }

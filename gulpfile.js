@@ -30,7 +30,6 @@ gulp.task('fetch', function(done) {
 
 gulp.task('html', function(){
   const templateData = parse.template(services);
-  console.log(templateData);
   return gulp.src('templates/**/*')
     .pipe(gulpDebug({title: 'HTML'}))
     .pipe(gulpHandlebars(templateData))
@@ -123,6 +122,16 @@ gulp.task('vendor-install', (callback) => {
   });
 });
 
+gulp.task('vendor-assets', function(done) {
+  const deps = parse.deps(services);
+  if(!deps.assets.length)
+    return done();
+
+  return gulp.src(deps.assets)
+    .pipe(gulpDebug({title: 'Vendor assets'}))
+    .pipe(gulp.dest(config.dist_folder + '/assets/vendor'))
+})
+
 gulp.task('vendor-css', function(done) {
   const deps = parse.deps(services);
   deps.css.unshift('assets/vendor-css/**/*.css');
@@ -146,7 +155,7 @@ gulp.task('vendor-js', function(done) {
 });
 
 
-gulp.task('vendor', gulp.series('vendor-install', 'vendor-css', 'vendor-js'))
+gulp.task('vendor', gulp.series('vendor-install', 'vendor-assets', 'vendor-css', 'vendor-js'))
 
 gulp.task('clean', function (done) {
   cmd.get(`
