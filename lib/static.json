@@ -3,7 +3,7 @@
     {"name": "Organisation", "content": "AEGEE"},
     {"name": "version", "content": "0.0.1"}
   ],
-  "externalCSS": ["//fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"],
+  "externalCSS": [],
   "externalJS": [],
   "modules": ["public.welcome"],
   "appName": "OMS",
@@ -24,6 +24,9 @@
   }, {
     "npm": "jquery",
     "js": "node_modules/jquery/dist/jquery.js"
+  }, {
+    "npm": "jquery-sortable",
+    "js": "node_modules/jquery-sortable/source/js/jquery-sortable.js"
   }, {
     "npm": "bootstrap@3",
     "css": ["node_modules/bootstrap/dist/css/bootstrap.css"],

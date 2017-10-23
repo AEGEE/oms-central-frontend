@@ -7,6 +7,7 @@ const gulpConcatJS = require('gulp-concat-js');
 const gulpSourcemaps = require('gulp-sourcemaps');
 const gulpConcat = require('gulp-concat');
 const gulpCleanCSS = require('gulp-clean-css');
+const gulpStripCSSComments = require('gulp-strip-css-comments');
 const gulpCleanJS = require('gulp-minify');
 const gulpUglify = require('gulp-uglify');
 const gulpEmpty = require('gulp-empty');
@@ -139,6 +140,7 @@ gulp.task('vendor-css', function(done) {
   return gulp.src(deps.css)
     .pipe(gulpDebug({title: 'Vendor CSS'}))
     .pipe(gulpCleanCSS({level: {1: {all:true}, 2: {all: true}}})) // maximum optimization level
+    .pipe(gulpStripCSSComments())
     .pipe(gulpConcat('assets/vendor.css'))
     .pipe(gulp.dest(config.dist_folder));
 });

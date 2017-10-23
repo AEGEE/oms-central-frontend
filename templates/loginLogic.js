@@ -172,9 +172,9 @@ omsApp
 .controller('LoginModalController', LoginModalController)
 .service('loginModal', LoginModalService);
 
-const coreApi = baseUrlRepository["oms-core"] + '/api';
 
 function LoginModalService($uibModal) {
+    const coreApi = baseUrlRepository["oms-core"] + '/api';
     
     var loginModalConfig = {
         loading: false,
@@ -211,6 +211,8 @@ function LoginModalService($uibModal) {
 };
 
 function LoginModalController($rootScope, $scope, $http) {
+    const coreApi = baseUrlRepository["oms-core"] + '/api';
+
 
     this.cancel = $scope.$dismiss;
 
