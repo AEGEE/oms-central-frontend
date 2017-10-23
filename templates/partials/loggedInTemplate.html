@@ -1,7 +1,3 @@
-<?php
-require_once('../../scripts/template_scripts.php');
-$omsObj = new omsHelperScript();
-?>
 
 <!-- begin #header -->
 <div ui-view="header"></div>
@@ -23,7 +19,7 @@ $omsObj = new omsHelperScript();
 
 <!-- begin #footer -->
 <div id="footer" class="footer">
-	&copy; <?=date('Y')?> <?=$omsObj->options['app_copyright']?> - Version <?=$omsObj->appVersion?><br />
+	{{{ copyright }}} - Version {{ version }}<br />
 	Powered by <a target="_blank" href="https://github.com/AEGEE/oms-neo-core">Online membership system</a>
 </div>
 <!-- end #footer -->
