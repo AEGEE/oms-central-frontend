@@ -7,15 +7,7 @@
   "externalJS": [],
   "modules": ["public.welcome"],
   "appName": "OMS",
-  "defaultModules": [{
-    "name": "Navigation",
-    "menu_position": 1,
-    "pages": [{
-      "code": "dashboard",
-      "name": "Navigation",
-      "icon": "fa fa-laptop"
-    }]
-  }],
+  "defaultModules": [],
   "blacklistedModules": ["oms-blacklisted-microservice"],
   "dependencies": [
   {
@@ -27,6 +19,9 @@
   }, {
     "npm": "jquery-sortable",
     "js": "node_modules/jquery-sortable/source/js/jquery-sortable.js"
+  }, {
+    "npm": "jquery-slimscroll",
+    "js": "node_modules/jquery-slimscroll/jquery.slimscroll.js"
   }, {
     "npm": "bootstrap@3",
     "css": ["node_modules/bootstrap/dist/css/bootstrap.css"],
@@ -45,7 +40,7 @@
     "module": "ui.router"
   }, {
     "npm": "angular-ui-bootstrap",
-    "js": ["node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js"],
+    "js": ["node_modules/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js"],
     "css": ["node_modules/angular-ui-bootstrap/dist/ui-bootstrap-csp.css"],
     "module": "ui.bootstrap"
   }, {

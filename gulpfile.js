@@ -139,7 +139,7 @@ gulp.task('vendor-css', function(done) {
 
   return gulp.src(deps.css)
     .pipe(gulpDebug({title: 'Vendor CSS'}))
-    .pipe(gulpCleanCSS({level: {1: {all:true}, 2: {all: true}}})) // maximum optimization level
+//    .pipe(gulpCleanCSS())
     .pipe(gulpStripCSSComments())
     .pipe(gulpConcat('assets/vendor.css'))
     .pipe(gulp.dest(config.dist_folder));
