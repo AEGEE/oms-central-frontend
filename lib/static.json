@@ -19,6 +19,9 @@
   "blacklistedModules": ["oms-blacklisted-microservice"],
   "dependencies": [
   {
+    "npm": "pace-js",
+    "js": "node_modules/pace-js/pace.js"
+  }, {
     "npm": "jquery",
     "js": "node_modules/jquery/dist/jquery.js"
   }, {
