@@ -60,7 +60,7 @@ function appRun($rootScope, $state, setting, $http, loginModal) {
   $rootScope.setting = setting;
   $rootScope.currentUser = undefined;
 
-  const coreApi = baseUrlRepository['oms-core'] + '/api';
+  const coreApi = baseUrlRepository['oms-core'] + 'api';
 
   $rootScope.$on('$stateChangeStart', function (event, toState, toParams) {
     var requireLogin = toState.data.requireLogin;
@@ -174,7 +174,7 @@ omsApp
 
 
 function LoginModalService($uibModal) {
-    const coreApi = baseUrlRepository["oms-core"] + '/api';
+    const coreApi = baseUrlRepository["oms-core"] + 'api';
     
     var loginModalConfig = {
         loading: false,
@@ -211,7 +211,7 @@ function LoginModalService($uibModal) {
 };
 
 function LoginModalController($rootScope, $scope, $http) {
-    const coreApi = baseUrlRepository["oms-core"] + '/api';
+    const coreApi = baseUrlRepository["oms-core"] + 'api';
 
 
     this.cancel = $scope.$dismiss;

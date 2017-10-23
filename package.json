@@ -8,7 +8,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
     "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-babel": "^7.0.0",
     "gulp-clean": "^0.3.2",
     "gulp-clean-css": "^3.9.0",
     "gulp-compile-handlebars": "^0.6.1",
@@ -25,8 +28,7 @@
     "gulp-strip-css-comments": "^1.2.0",
     "gulp-uglify": "^3.0.0",
     "node-cmd": "^3.0.0",
-    "request": "^2.83.0",
-    "ui-router": "^1.0.0-alpha.3"
+    "request": "^2.83.0"
   },
   "directories": {
     "lib": "lib"

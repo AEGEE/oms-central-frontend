@@ -9,6 +9,7 @@ const gulpConcat = require('gulp-concat');
 const gulpCleanCSS = require('gulp-clean-css');
 const gulpStripCSSComments = require('gulp-strip-css-comments');
 const gulpCleanJS = require('gulp-minify');
+const gulpBabel = require('gulp-babel');
 const gulpUglify = require('gulp-uglify');
 const gulpEmpty = require('gulp-empty');
 const gulpDebug = require('gulp-debug');
@@ -40,7 +41,15 @@ gulp.task('html', function(){
 gulp.task('download', function() {
   const cssData = parse.css(services);
   const jsData = parse.js(services);
-  return gulpDownload(cssData.local.concat(jsData.local))
+  const data = cssData.local
+    .concat(jsData.local)
+    .map((item) => {
+      return {
+        url: item,
+        file: item.substring(7)
+      }
+    })
+  return gulpDownload(data)
     .pipe(gulp.dest(config.download_folder));
 })
 
@@ -51,8 +60,8 @@ gulp.task('css', function(){
   if(!config.devMode) {
     return gulp.src(['assets/css/**/*.css', config.download_folder + '/**/*.css'])
       .pipe(gulpDebug({title: 'CSS'}))
-      .pipe(gulpCleanCSS())
       .pipe(gulpConcat('assets/main.css'))
+      .pipe(gulpCleanCSS())
       .pipe(gulp.dest(config.dist_folder));
   }
   else {
@@ -72,8 +81,9 @@ gulp.task('js', function(){
   if(!config.devMode) {
     return gulp.src(['assets/js/**/*.js', config.download_folder + '/**/*.js'])
       .pipe(gulpDebug({title: 'JS'}))
-      .pipe(gulpCleanJS())
+      .pipe(gulpBabel({presets: ['babel-preset-env'].map(require.resolve)}))
       .pipe(gulpConcat('assets/main.js'))
+      .pipe(gulpUglify({mangle: false}))
       .pipe(gulp.dest(config.dist_folder));  
   }
   else {
@@ -139,9 +149,9 @@ gulp.task('vendor-css', function(done) {
 
   return gulp.src(deps.css)
     .pipe(gulpDebug({title: 'Vendor CSS'}))
-//    .pipe(gulpCleanCSS())
-    .pipe(gulpStripCSSComments())
     .pipe(gulpConcat('assets/vendor.css'))
+    .pipe(gulpCleanCSS())
+    .pipe(gulpStripCSSComments())
     .pipe(gulp.dest(config.dist_folder));
 });
 
@@ -151,8 +161,8 @@ gulp.task('vendor-js', function(done) {
 
   return gulp.src(deps.js)
     .pipe(gulpDebug({title: 'Vendor JS'}))
-    .pipe(gulpUglify()) // uglify turned out better than clean-js, though making the sourcecode unreadable
     .pipe(gulpConcat('assets/vendor.js'))
+    .pipe(gulpUglify()) // uglify turned out better than clean-js, though making the sourcecode unreadable
     .pipe(gulp.dest(config.dist_folder));
 });
 
