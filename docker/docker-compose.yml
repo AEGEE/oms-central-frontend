@@ -17,8 +17,6 @@ services:
             dockerfile: ./Dockerfile.dev
         volumes:
             - "centralfrontend:/usr/app/dist:ro"
-        ports:
-            - "8088:80"
         labels:
             - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/"
             - "traefik.frontend.priority=11"

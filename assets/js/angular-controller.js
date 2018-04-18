@@ -167,7 +167,7 @@ omsApp.controller('sidebarController', function($scope, $rootScope, $state) {
 omsApp.controller('headerController', function($rootScope, $state, $http) {
     var vm = this;
     vm.user = $rootScope.currentUser;
-    vm.notifications_enabled = true;
+    vm.notifications_enabled = templateConstants.notificationsEnabled == "true";
 
     vm.markRead = (notification) => {
       if(vm.notifications) {
@@ -232,19 +232,21 @@ omsApp.controller('headerController', function($rootScope, $state, $http) {
   
 
     vm.logout = function() {
-      var token = window.localStorage.getItem("X-Auth-Token");
-      window.localStorage.removeItem("X-Auth-Token");
-      $rootScope.currentUser = undefined;
       $http({
           method: 'POST',
-          url: '/api/logout'
+          url: templateConstants.logoutUrl
       }).then((result) => {
+        window.localStorage.removeItem("X-Auth-Token");
+        window.localStorage.removeItem("Refresh-Token");
+        $rootScope.currentUser = undefined;
         $state.go('public.welcome');
         //window.location.reload();
       }).catch((err) => {
         $state.go('public.welcome');
         //window.location.reload();
-      })
+      });
+
+
     }
 });
 

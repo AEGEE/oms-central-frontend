@@ -7,6 +7,14 @@
   "externalJS": [],
   "modules": ["public.welcome"],
   "appName": "OMS",
+  "templateConstants": {
+    "appName": "OMS",
+    "checkTokenUrl": "/services/oms-core-elixir/api/members/me",
+    "getAccessTokenUrl": "/services/oms-loginservice/api/renew",
+    "loginUrl": "/services/oms-loginservice/api/login",
+    "logoutUrl": "/services/oms-loginservice/api/logout",
+    "notificationsEnabled": "false"
+  },
   "defaultModules": [],
   "blacklistedModules": ["oms-blacklisted-microservice"],
   "dependencies": [

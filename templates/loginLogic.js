@@ -9,7 +9,8 @@ var omsApp = angular
   {{/each}}
 ])
 .config(appConfig)
-.factory(responseObserver)
+.factory(responseInterceptor)
+.factory(requestInterceptor)
 .run(appRun);
 
 
@@ -19,10 +20,18 @@ var baseUrlRepository = {
   {{/each}}
 };
 
+
+var templateConstants = {
+  {{#each templateConstants}}
+    "{{@key}}": "{{this}}",
+  {{/each}}
+};
+
 // TODO get this part out of the index.html somehow
 function appConfig($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider)
 {
-  $httpProvider.interceptors.push(responseObserver);
+  $httpProvider.interceptors.push(responseInterceptor);
+  $httpProvider.interceptors.push(requestInterceptor)
   $locationProvider.html5Mode(true);
 
   $urlRouterProvider.otherwise('/');
@@ -55,66 +64,28 @@ function appConfig($stateProvider, $urlRouterProvider, $locationProvider, $httpP
 }
 
 /** @ngInject */
-function appRun($rootScope, $state, setting, $http, loginModal) {
+function appRun($rootScope, $state, $transitions, setting, $http, loginModal) {
   $rootScope.$state = $state;
   $rootScope.setting = setting;
   $rootScope.currentUser = undefined;
 
-  const coreApi = baseUrlRepository['oms-core'] + 'api';
 
-  $rootScope.$on('$stateChangeStart', function (event, toState, toParams) {
-    var requireLogin = toState.data.requireLogin;
+  $transitions.onStart({}, function(transition) {
 
-    // On a route which requires login, check if we know user data
-    if (requireLogin && typeof $rootScope.currentUser === 'undefined') {
-      event.preventDefault();
-
-      // If we still have a token, try if it's valid to fetch the user data
-      var token = window.localStorage.getItem("X-Auth-Token");
-      if(token) {
-        // We still have a token, attemp to fetch data
-        $http({
-          method: 'POST',
-          url: coreApi + '/tokens/user',
-          data: {
-            token: token
-          },
-          headers: {
-            "X-Auth-Token": token
-          }
-        }).then((response) => {
-          // Worked, we are still logged in from the last time
-
-          $http.defaults.headers.common['X-Auth-Token'] = token;
-          $.ajaxSetup({headers: { 'X-Auth-Token': token }});
-          $rootScope.currentUser = response.data.data;
-          $state.go(toState.name, toParams)
-        }).catch((err) => {
-          // Errors were intercepted by the response observer already, we can just check if the login was successful
-          if($rootScope.currentUser)
-            return $state.go(toState.name, toParams);
-          else
-            return $state.go('public.welcome');
-        });
-      } else {
-        // Otherwise we will have to log in anyways
-        loginModal()
-        .then(function () {
-          // Successful login
-          return $state.go(toState.name, toParams);
-        })
-        .catch(function () {
-          // Unsuccessful login
-          return $state.go('public.welcome');
-        });
-      }
+    if(transition.to().data.requireLogin && !$rootScope.currentUser) {
+      return new Promise((resolve, reject) => {
+        authenticate(loginModal, $rootScope, $http)
+        .then(() => {resolve();})
+        .catch(() => {resolve(transition.router.stateService.target('public.welcome'));})
+      });
     }
+
+    return;
   });
 }
 
-
 /** @ngInject */
-function responseObserver($q, $window, $timeout, $injector) {
+function responseInterceptor($q, $timeout, $injector, $rootScope) {
   var loginModal, $http, $state;
 
   // this trick must be done so that we don't receive
@@ -132,7 +103,7 @@ function responseObserver($q, $window, $timeout, $injector) {
         case 401: // Trust the backend to only send this upon invalid access token
           var deferred = $q.defer();
 
-          loginModal()
+          authenticate(loginModal, $rootScope, $http, {skipCheckToken: true})
           .then(function () {
             // The old X-Auth-Token is still stored in the requests and they would fail again, thus replace
             errorResponse.config.headers['X-Auth-Token'] = window.localStorage.getItem("X-Auth-Token")
@@ -167,6 +138,127 @@ function responseObserver($q, $window, $timeout, $injector) {
   };
 }
 
+function requestInterceptor() {
+  return {
+    'request': function(config) {
+      config.headers["X-Auth-Token"] = window.localStorage.getItem("X-Auth-Token");
+      return config;
+    }
+  }
+}
+
+
+// Can be called whenever there is insecurity about the login-state of the user
+// In case of being already logged in, the function does nothing
+// Returns a promise which will resolve when the user is surely authenticated
+// Might call a loginModal in between and take quite some time until fulfillment
+// You can pass options to skip certain steps in the process
+//  - If you set skipCheckToken to true you can avoid another token check because it might be clear that the token is not valid
+//  - If you set skipRefreshRequest to true the function will not try to use the potentially present refresh token but instantly ask for login.
+//  - If you set skipLoginUser to true the function will not ask the user for login credentials. The promise will fail in case the other options are exhausted
+var currentRunningAuthPromise = null;
+function authenticate(loginModal, $rootScope, $http, options) {
+  if(!options)
+    options = {}
+
+  // Check for the validity of the x-auth-token that we still might have
+  let checkXAuthToken = (token) => {
+    return new Promise((resolve, reject) => {
+      if(token == null)
+        return resolve({success: false});
+      $.get({
+        url: "{{templateConstants.checkTokenUrl}}",
+        headers: {"x-auth-token": token}
+      }).done((data, status) => {
+        if(data.success && data.data)
+          return resolve({success: true, user: data.data});
+        else
+          return resolve({success: false, error: data})
+      }).fail((error) => {
+        return resolve({success: false, error: error});
+      });
+    });
+  }
+
+  // Use the requestToken to obtain a new access token
+  let requestXAuthToken = (token) => {
+    return new Promise((resolve, reject) => {
+      if(token == null)
+        return resolve({success: false});
+
+      $.ajax({
+        url: "{{templateConstants.getAccessTokenUrl}}",
+        data: {refresh_token: token},
+        method: "POST"
+      }).done((data, status) => {
+        if(data.success && data.access_token) {
+          window.localStorage.setItem("X-Auth-Token", data.access_token);
+          resolve({success: true});
+        }
+        else {
+          resolve({success: false, error: data});
+        }
+      }).fail((error) => {
+        resolve({success: false, error: error});
+      });
+    })
+  }
+
+  // Call a login-modal with the passed loginModal angular service
+  let callLoginModal = () => {
+    return new Promise((resolve, reject) => {
+      loginModal().then(() => {
+        resolve({success: true})
+      }).catch(() => {
+        resolve({success: false})
+      })
+    });
+  }
+
+  let performAuthProcess = async function() {
+    let res = {success: false};
+    // First we want to check if we might already have a valid token
+    // If an x-auth-token is present, check with the loginservice if that's valid
+    if(!options.skipCheckToken)
+      res = await checkXAuthToken(window.localStorage.getItem("X-Auth-Token"));
+    // If that was not valid, try with the refresh token to obtain a new access token
+    if(!res.success && !options.skipRefreshRequest)
+      res = await requestXAuthToken(window.localStorage.getItem("Refresh-Token"));
+    // If that didn't work, ask the user to login
+    if (!res.success && !options.skipLoginUser)
+      res = await callLoginModal();
+
+    // If that didn't work, fail.
+    if(!res.success){
+      throw "Could not perform log in";
+    }
+    // If it did work, fetch user data and store it
+    else
+      res = await checkXAuthToken(window.localStorage.getItem("X-Auth-Token"));
+
+    if(res.success && res.user) {
+      $rootScope.currentUser = res.user;
+      return;
+    } else {
+      throw "Could not fetch user data though login should have worked"
+    }
+  }
+
+  // If there is a promise running already, return that one, otherwise create the function
+  if(!currentRunningAuthPromise) {
+    currentRunningAuthPromise = new Promise((resolve, reject) => {
+      performAuthProcess().then(() => {
+        currentRunningAuthPromise = null;
+        resolve();
+      }).catch((error) => {
+        currentRunningAuthPromise = null;
+        reject(error);
+      });
+    });
+  }
+  return currentRunningAuthPromise;
+}
+
 
 omsApp
 .controller('LoginModalController', LoginModalController)
@@ -174,81 +266,38 @@ omsApp
 
 
 function LoginModalService($uibModal) {
-    const coreApi = baseUrlRepository["oms-core"] + 'api';
-    
-    var loginModalConfig = {
-        loading: false,
-        promise: undefined
-    };
 
-    var assignCurrentUser = function(user) {
-        loginModalConfig.loading = false;
-        return user;
-    };
-    
     return function() {
-        // Either return promise of already created modal
-        if(loginModalConfig.loading) {
-            return loginModalConfig.promise.then(function(user) {
-                return user;
-            });
-        }
-        // Or create a new modal
-        else {
 
-            loginModalConfig.loading = true;
+        var instance = $uibModal.open({
+            templateUrl: 'modules/loginModal.html',
+            controller: 'LoginModalController as vm'
+        });
 
-            var instance = $uibModal.open({
-                templateUrl: 'modules/loginModal.html',
-                controller: 'LoginModalController as vm'
-            });
+        instance.result;
 
-            loginModalConfig.promise = instance.result;
-
-            return instance.result.then(assignCurrentUser);
-        }
+        return instance.result;
+        
     };
 };
 
 function LoginModalController($rootScope, $scope, $http) {
-    const coreApi = baseUrlRepository["oms-core"] + 'api';
-
-
     this.cancel = $scope.$dismiss;
 
     this.submit = function (email, password) {
         $http({
             method: 'POST',
-            url: coreApi + '/login',
+            url: "{{templateConstants.loginUrl}}",
             data: {
                 username: email,
                 password: password
             }
         }).then((response) => {
-            if(response.data.success == 1) {
+            if(response.data.success == 1 && response.data.access_token && response.data.refresh_token) {
                 // Store in local storage
-                window.localStorage.setItem("X-Auth-Token", response.data.data);
-                $http.defaults.headers.common['X-Auth-Token'] = response.data.data;
-                $.ajaxSetup({headers: { 'X-Auth-Token': response.data.data }});
-                $http({
-                    method: 'POST',
-                    url: coreApi + '/tokens/user',
-                    data: {
-                        token: localStorage.getItem("X-Auth-Token")
-                    }
-                })
-                .then(function successCallback(response) {
-                    $rootScope.currentUser = response.data.data;
-                    $scope.$close(response.data.data);
-                }).catch(function(err) {
-                    $.gritter.add({
-                        title: 'Login error!',
-                        text: 'Could not fetch user data',
-                        sticky: true,
-                        time: 3600,
-                        class_name: 'my-sticky-class'
-                    });
-                });
+                window.localStorage.setItem("X-Auth-Token", response.data.access_token);
+                window.localStorage.setItem("Refresh-Token", response.data.refresh_token);
+                $scope.$close();
             }
             else { 
                 $.gritter.add({
