@@ -92,5 +92,10 @@
     "js": "node_modules/angular-ui-bootstrap-datetimepicker/datetimepicker.js",
     "css": "node_modules/angular-ui-bootstrap-datetimepicker/datetimepicker.css",
     "module": "ui.bootstrap.datetimepicker"
+  }, {
+    "npm": "angucomplete-alt",
+    "js": "node_modules/angucomplete-alt/angucomplete-alt.js",
+    "css": "node_modules/angucomplete-alt/angucomplete-alt.css",
+    "module": "angucomplete-alt"
   }]
 }

@@ -147,23 +147,37 @@ gulp.task('vendor-css', function(done) {
   const deps = parse.deps(services);
   deps.css.unshift('assets/vendor-css/**/*.css');
 
-  return gulp.src(deps.css)
-    .pipe(gulpDebug({title: 'Vendor CSS'}))
-    .pipe(gulpConcat('assets/vendor.css'))
-    .pipe(gulpCleanCSS())
-    .pipe(gulpStripCSSComments())
-    .pipe(gulp.dest(config.dist_folder));
+  if(!config.devMode) {
+    return gulp.src(deps.css)
+      .pipe(gulpDebug({title: 'Vendor CSS'}))
+      .pipe(gulpConcat('assets/vendor.css'))
+      .pipe(gulpCleanCSS())
+      .pipe(gulpStripCSSComments())
+      .pipe(gulp.dest(config.dist_folder));
+  } else {
+    return gulp.src(deps.css)
+      .pipe(gulpDebug({title: 'Vendor CSS'}))
+      .pipe(gulpConcat('assets/vendor.css'))
+      .pipe(gulp.dest(config.dist_folder));
+  }
 });
 
 gulp.task('vendor-js', function(done) {
   const deps = parse.deps(services);
   deps.js.unshift('assets/vendor-js/**/*.js');
 
-  return gulp.src(deps.js)
-    .pipe(gulpDebug({title: 'Vendor JS'}))
-    .pipe(gulpConcat('assets/vendor.js'))
-    .pipe(gulpUglify()) // uglify turned out better than clean-js, though making the sourcecode unreadable
-    .pipe(gulp.dest(config.dist_folder));
+  if(!config.devMode) {
+    return gulp.src(deps.js)
+      .pipe(gulpDebug({title: 'Vendor JS'}))
+      .pipe(gulpConcat('assets/vendor.js'))
+      .pipe(gulpUglify()) // uglify turned out better than clean-js, though making the sourcecode unreadable
+      .pipe(gulp.dest(config.dist_folder));
+  } else {
+    return gulp.src(deps.js)
+      .pipe(gulpDebug({title: 'Vendor JS'}))
+      .pipe(gulpConcat('assets/vendor.js'))
+      .pipe(gulp.dest(config.dist_folder));
+  }
 });
 
 

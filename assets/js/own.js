@@ -17,7 +17,14 @@ const showError = (err, description = "Could not process action: ") => {
   });
 };
 
+// Copied from the angular tutorial on how to add transformations
+const appendHttpResponseTransform = (defaults, transform) => {
+  // We can't guarantee that the default transformation is an array
+  defaults = angular.isArray(defaults) ? defaults : [defaults];
 
+  // Append the new transformation to the defaults
+  return defaults.concat(transform);
+}
 
 const showSuccess = (message) => {
   $.gritter.add({
@@ -65,15 +72,14 @@ const convertToCsv = (data) => {
 const infiniteScroll = ($http, vm, url, paramInjector) => {
   vm.infiniteScroll = {
     pageSize: 20,
-    raceCounter: 0,
-    search: "",
+    raceCounter: 0
   }
 
   vm.resetData = () => {
     vm.infiniteScroll.block = false;
     vm.infiniteScroll.busy = false;
     vm.infiniteScroll.data = [];
-    vm.infiniteScroll.page = 1;
+    vm.infiniteScroll.page = 0;
     return vm.loadNextPage();
   }
 
@@ -83,8 +89,8 @@ const infiniteScroll = ($http, vm, url, paramInjector) => {
     vm.infiniteScroll.raceCounter++;
     var localRaceCounter = vm.infiniteScroll.raceCounter;
     var params = {
-      page: vm.infiniteScroll.page,
-      per_page: vm.infiniteScroll.pageSize
+      offset: vm.infiniteScroll.page * vm.infiniteScroll.pageSize,
+      limit: vm.infiniteScroll.pageSize
     };
     if(paramInjector)
       params = paramInjector(params);
@@ -105,8 +111,7 @@ const infiniteScroll = ($http, vm, url, paramInjector) => {
         if(response.data.data.length > 0) {
           vm.infiniteScroll.page++;
           vm.infiniteScroll.data.push.apply(vm.infiniteScroll.data, response.data.data);
-          if(response.data.meta.current_page != response.data.meta.last_page)
-            vm.infiniteScroll.block = false;
+          vm.infiniteScroll.block = false;
         }
       }
     }).catch((error) => {
