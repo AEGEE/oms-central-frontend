@@ -281,8 +281,13 @@ function LoginModalService($uibModal) {
     };
 };
 
-function LoginModalController($rootScope, $scope, $http) {
+function LoginModalController($rootScope, $scope, $http, $state) {
     this.cancel = $scope.$dismiss;
+
+    this.redirect = (state_param) => {
+      $scope.$dismiss();
+      $state.go(state_param);
+    }
 
     this.submit = function (email, password) {
         $http({

@@ -236,16 +236,16 @@ omsApp.controller('headerController', function($rootScope, $state, $http) {
           method: 'POST',
           url: templateConstants.logoutUrl
       }).then((result) => {
+        $state.go('public.welcome');
         window.localStorage.removeItem("X-Auth-Token");
         window.localStorage.removeItem("Refresh-Token");
         $rootScope.currentUser = undefined;
-        $state.go('public.welcome');
-        //window.location.reload();
       }).catch((err) => {
         $state.go('public.welcome');
-        //window.location.reload();
+        window.localStorage.removeItem("X-Auth-Token");
+        window.localStorage.removeItem("Refresh-Token");
+        $rootScope.currentUser = undefined;
       });
-
 
     }
 });
