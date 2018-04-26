@@ -1,5 +1,11 @@
 .login-content {
-	color: #efe !important;
+	color: #fff !important;
+}
+
+.login-cover-image img {
+	height: 100%;
+	object-fit: cover;
+	width: 100%;
 }
 
 .bodytile {

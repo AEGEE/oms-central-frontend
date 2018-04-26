@@ -230,6 +230,9 @@ function authenticate(loginModal, $rootScope, $http, options) {
 
     // If that didn't work, fail.
     if(!res.success){
+      window.localStorage.removeItem("X-Auth-Token");
+      window.localStorage.removeItem("Refresh-Token");
+      $rootScope.currentUser = undefined;
       throw "Could not perform log in";
     }
     // If it did work, fetch user data and store it
@@ -240,6 +243,9 @@ function authenticate(loginModal, $rootScope, $http, options) {
       $rootScope.currentUser = res.user;
       return;
     } else {
+      window.localStorage.removeItem("X-Auth-Token");
+      window.localStorage.removeItem("Refresh-Token");
+      $rootScope.currentUser = undefined;
       throw "Could not fetch user data though login should have worked"
     }
   }
