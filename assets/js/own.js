@@ -70,9 +70,9 @@ const convertToCsv = (data) => {
   return csvContent;
 }
 
-const infiniteScroll = ($http, vm, url, paramInjector) => {
+const infiniteScroll = ($http, vm, url, paramInjector, pageSize = 15) => {
   vm.infiniteScroll = {
-    pageSize: 20,
+    pageSize: pageSize,
     raceCounter: 0
   }
 
@@ -83,12 +83,72 @@ const infiniteScroll = ($http, vm, url, paramInjector) => {
       vm.infiniteScroll.data = [];
     vm.infiniteScroll.resetOnNextFetch = true;
     vm.infiniteScroll.page = 0;
-    return vm.loadNextPage();
+    promise = vm.loadNextPage();
+    vm.infiniteScroll.loadingMoreResults = false
+    return promise;
+  }
+
+  // Merges two arrays, not relying on any sorting but also maybe shuffling a preexisting order
+  const mergeUnsorted = (local_data, new_data, compare) => {
+    // Loop through the existing data and try to find partner elements in the new data
+    for(let i=0; i<local_data.length; i++) {
+      let idx = new_data.findIndex(compare.bind(null, local_data[i]));
+      // In case we found no partner element, remove that one
+      if(idx == -1) {
+        local_data.splice(i, 1);
+        i--;
+      } 
+      // In case we did find a partner elements, remove that from the input data to not add it again at the end
+      else {
+        new_data.splice(idx, 1);
+      }
+    }
+    // Add remaining items which we haven't added yet
+    Array.prototype.push.apply(local_data, new_data);
+  }
+
+  // Merges two arrays relying on them being sorted and maintaining sortedness
+  const mergeSorted = (local_data, new_data, compare) => {
+    let i=0;
+    let j=0;
+    while(i<local_data.length) {
+      // Two possible scenarios:
+      // 1) local_data[i] has a match in new_data at idx and idx is equal or greater to j, 
+      //    - add everything in new_data between j and idx to local_data and preserve local_data[i]
+      //    - advance j to idx plus one
+      //    - advance i by amount of added data plus one
+      // 2) local_data[i] has no match in new_data
+      //    - remove local_data[i]
+      // 3) local_data[i] has matched to new_data at idx and idx is smaller than j
+      //    -> local_data wasn't sorted and this element was inserted earlier one
+      //    - remove local_data[i]
+      let idx = new_data.findIndex(compare.bind(null, local_data[i]));
+      // 2) and 3)
+      if(idx < j)
+        local_data.splice(i, 1);
+      // 1)
+      else {
+        let count_additions = 0;
+        while(j < idx) {
+          local_data.splice(i, 0, new_data[j]);
+          j++;
+          count_additions++;
+        }
+        j++;
+        i = i + count_additions + 1;
+      }
+    }
+    // Add remaining elements in new_data to local_data
+    while(j < new_data.length) {
+      local_data.push(new_data[j]);
+      j++;
+    }
   }
 
   vm.loadNextPage = () => {
     vm.infiniteScroll.block = true;
     vm.infiniteScroll.busy = true;
+    vm.infiniteScroll.loadingMoreResults = true;
     vm.infiniteScroll.raceCounter++;
     var localRaceCounter = vm.infiniteScroll.raceCounter;
     var params = {
@@ -114,6 +174,7 @@ const infiniteScroll = ($http, vm, url, paramInjector) => {
     }).then((response) => {
       if(localRaceCounter == vm.infiniteScroll.raceCounter) {
         vm.infiniteScroll.busy = false;
+        vm.infiniteScroll.loadingMoreResults = false;
         // If we have data, add that to the list
         if(response.data.data.length > 0) {
           vm.infiniteScroll.page++;
@@ -122,22 +183,10 @@ const infiniteScroll = ($http, vm, url, paramInjector) => {
           if(vm.infiniteScroll.resetOnNextFetch == true) {
             vm.infiniteScroll.resetOnNextFetch = false;
             var new_data = response.data.data.slice();
+            // This relies on elements having an id, 
+            // The problem with normal equal comparison is that angular modifies the elements
             const isPartnerElement = function(elem1, elem2) {return elem1.id == elem2.id;}
-            // Loop through the existing data and try to find partner elements in the new data
-            for(let i=0; i<vm.infiniteScroll.data.length; i++) {
-              let idx = new_data.findIndex(isPartnerElement.bind(null, vm.infiniteScroll.data[i]));
-              // In case we found no partner element, remove that one
-              if(idx == -1) {
-                vm.infiniteScroll.data.splice(i, 1);
-                i--;
-              } 
-              // In case we did find a partner elements, remove that from the input data to not add it again at the end
-              else {
-                new_data.splice(idx, 1);
-              }
-            }
-            // Add remaining items which we haven't added yet
-            Array.prototype.push.apply(vm.infiniteScroll.data, new_data);
+            mergeSorted(vm.infiniteScroll.data, new_data, isPartnerElement)
           }
           // If it was a load of an additional page just add data
           else 
