@@ -8,6 +8,31 @@
 	width: 100%;
 }
 
+.animate-infinite-scroll {
+	opacity: 1;
+	margin-left: 0;
+}
+.animate-infinite-scroll.ng-enter {
+  transition:0.2s linear all;
+  opacity:0;
+  margin-left: 100%;
+}
+.animate-infinite-scroll.ng-enter.ng-enter-active {
+  opacity:1;
+  margin-left: 0;
+}
+.animate-infinite-scroll.ng-leave {
+  transition: 0.2s linear all;
+  opacity: 1;
+  margin-left: 0;
+}
+.animate-infinite-scroll.ng-leave-active {
+	opacity: 0;
+  margin-left: 100%;
+}
+
+
+
 .bodytile {
 	background-color: white;
 	margin: 5px 15px 5px 15px;

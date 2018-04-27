@@ -97,5 +97,13 @@
     "js": "node_modules/angucomplete-alt/angucomplete-alt.js",
     "css": "node_modules/angucomplete-alt/angucomplete-alt.css",
     "module": "angucomplete-alt"
+  }, {
+    "npm": "ng-infinite-scroll",
+    "js": "node_modules/ng-infinite-scroll/build/ng-infinite-scroll.js",
+    "module": "infinite-scroll"
+  }, {
+    "npm": "angular-animate",
+    "js": "node_modules/angular-animate/angular-animate.js",
+    "module": "ngAnimate"
   }]
 }
