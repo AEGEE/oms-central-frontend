@@ -44,7 +44,7 @@
     "js": ["node_modules/angular/angular.js"]
   }, {
     "npm": "@uirouter/angularjs",
-    "js": ["node_modules/angular-ui-router/release/angular-ui-router.js"],
+    "js": ["node_modules/@uirouter/angularjs/release/angular-ui-router.js"],
     "module": "ui.router"
   }, {
     "npm": "angular-ui-bootstrap",
