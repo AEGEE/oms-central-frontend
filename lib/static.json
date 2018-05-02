@@ -10,9 +10,9 @@
   "templateConstants": {
     "appName": "OMS",
     "checkTokenUrl": "/services/oms-core-elixir/api/members/me",
-    "getAccessTokenUrl": "/services/oms-loginservice/api/renew",
-    "loginUrl": "/services/oms-loginservice/api/login",
-    "logoutUrl": "/services/oms-loginservice/api/logout",
+    "getAccessTokenUrl": "/services/oms-core-elixir/api/renew",
+    "loginUrl": "/services/oms-core-elixir/api/login",
+    "logoutUrl": "/services/oms-core-elixir/api/logout",
     "notificationsEnabled": "false"
   },
   "defaultModules": [],

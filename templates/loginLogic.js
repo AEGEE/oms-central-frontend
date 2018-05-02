@@ -314,7 +314,7 @@ function LoginModalController($rootScope, $scope, $http, $state) {
                 $.gritter.add({
                     title: 'Login error!',
                     text: 'Username / password invalid',
-                    sticky: true,
+                    sticky: false,
                     time: 3600,
                     class_name: 'my-sticky-class'
                 });
@@ -323,7 +323,7 @@ function LoginModalController($rootScope, $scope, $http, $state) {
             $.gritter.add({
                 title: 'Login error!',
                 text: 'Username / password invalid',
-                sticky: true,
+                sticky: false,
                 time: 3600,
                 class_name: 'my-sticky-class'
             }); 
