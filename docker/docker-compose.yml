@@ -10,6 +10,7 @@ services:
         volumes:
             - "./$PATH_OMS_CENTRAL_FRONTEND/../:/usr/app/src"
             - "centralfrontend:/usr/app/dist"
+            - "centralfrontend-build:/usr/app/build"
 
     oms-central-frontend-nginx:
         build:
@@ -28,6 +29,8 @@ services:
 
 volumes:
     centralfrontend:
+        driver: "local"
+    centralfrontend-build:
         driver: "local"
 
 networks:

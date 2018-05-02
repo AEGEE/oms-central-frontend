@@ -83,7 +83,7 @@ const infiniteScroll = ($http, vm, url, paramInjector, pageSize = 15) => {
       vm.infiniteScroll.data = [];
     vm.infiniteScroll.resetOnNextFetch = true;
     vm.infiniteScroll.page = 0;
-    promise = vm.loadNextPage();
+    let promise = vm.loadNextPage();
     vm.infiniteScroll.loadingMoreResults = false
     return promise;
   }
