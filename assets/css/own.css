@@ -2,10 +2,18 @@
 	color: #fff !important;
 }
 
+.login-cover {
+  position: relative;
+}
+
 .login-cover-image img {
 	height: 100%;
 	object-fit: cover;
 	width: 100%;
+}
+
+.login-v2 {
+  margin: 100px auto 0 auto !important;
 }
 
 .animate-infinite-scroll {

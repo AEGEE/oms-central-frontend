@@ -320,13 +320,18 @@ function LoginModalController($rootScope, $scope, $http, $state) {
                 });
             }
         }).catch((err) => {
+          if(err.status == 422) {
             $.gritter.add({
                 title: 'Login error!',
                 text: 'Username / password invalid',
                 sticky: false,
                 time: 3600,
                 class_name: 'my-sticky-class'
-            }); 
+            });
+          }
+          else {
+            showError(err);
+          }
         });
     };
 }
