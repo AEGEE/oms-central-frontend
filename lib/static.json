@@ -105,5 +105,9 @@
     "npm": "angular-animate",
     "js": "node_modules/angular-animate/angular-animate.js",
     "module": "ngAnimate"
+  }, {
+    "npm": "angular-file-upload",
+    "js": "node_modules/angular-file-upload/dist/angular-file-upload.js",
+    "module": "angularFileUpload"
   }]
 }
